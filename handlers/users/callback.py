@@ -35,18 +35,14 @@ async def buy_access_handler(call: types.CallbackQuery, state: FSMContext, db: D
     await call.message.answer(f"""
 💳 Метод пополнения: Aaio
 💸 Сумма к оплате: <code>{config.price_access}</code> rub
-🆔 ID платежа: {bill_id}""", reply_markup=kb.keyboard_payment(url=pay_url))
+🆔 ID платежа: <code>{bill_id}</code>""", reply_markup=kb.keyboard_payment(url=pay_url))
     
 
 @router.callback_query(F.data == ('check_pay'))
 async def check_pay_handler(call: types.CallbackQuery, state: FSMContext, db: DataBase, aaio: Aaio, bot: Bot):
-    entities = call.message.entities or []
-    bill_id = ""
-    for item in entities:
-        if item.type == 'code':
-            bill_id = item.extract_from(call.message.text)
-            break
 
+
+    bill_id = (call.message.text).split('\n')[-1].split(' ')[-1]
     status_payment = await aaio.get_order(payment_id=bill_id)
     status_ = status_payment.get('status') == 'success'
     if status_:
